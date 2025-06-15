@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review System</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .reviews {
+            margin-top: 20px;
+        }
+        .review {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product Reviews</h1>
+        <div>
+            <select id="productSelect">
+                <option value="Apple iPhone 13">Apple iPhone 13</option>
+                <option value="Samsung Galaxy Z Fold 3">Samsung Galaxy Z Fold 3</option>
+                <option value="Sony PlayStation 5">Sony PlayStation 5</option>
+            </select>
+        </div>
+        <textarea id="reviewText" placeholder="Write your review here..."></textarea>
+        <button id="submitReview">Submit Review</button>
+        <div id="error" class="error"></div>
+        <div id="reviews" class="reviews"></div>
+    </div>
+
+    <script>
+        const initialData = [
+            {
+                product: "Apple iPhone 13",
+                reviews: [
+                    {
+                        id: "1",
+                        text: "Отличный телефон! Батарея держится долго.",
+                    },
+                    {
+                        id: "2",
+                        text: "Камера супер, фото выглядят просто потрясающе.",
+                    },
+                ],
+            },
+            {
+                product: "Samsung Galaxy Z Fold 3",
+                reviews: [
+                    {
+                        id: "3",
+                        text: "Интересный дизайн, но дорогой.",
+                    },
+                ],
+            },
+            {
+                product: "Sony PlayStation 5",
+                reviews: [
+                    {
+                        id: "4",
+                        text: "Люблю играть на PS5, графика на высоте.",
+                    },
+                ],
+            },
+        ];
+
+        let reviewsData = [...initialData];
+
+        function displayReviews() {
+            const reviewsContainer = document.getElementById('reviews');
+            reviewsContainer.innerHTML = '';
+            
+            const selectedProduct = document.getElementById('productSelect').value;
+            const productData = reviewsData.find(p => p.product === selectedProduct);
+            
+            if (productData && productData.reviews.length > 0) {
+                productData.reviews.forEach(review => {
+                    const reviewElement = document.createElement('div');
+                    reviewElement.className = 'review';
+                    reviewElement.innerHTML = `<p>${review.text}</p>`;
+                    reviewsContainer.appendChild(reviewElement);
+                });
+            } else {
+                reviewsContainer.innerHTML = '<p>No reviews yet for this product.</p>';
+            }
+        }
+
+        function addReview() {
+            const reviewText = document.getElementById('reviewText').value.trim();
+            const errorElement = document.getElementById('error');
+            const selectedProduct = document.getElementById('productSelect').value;
+            
+            try {
+                if (reviewText.length < 50 || reviewText.length > 500) {
+                    throw new Error('Review must be between 50 and 500 characters long');
+                }
+                
+                const productIndex = reviewsData.findIndex(p => p.product === selectedProduct);
+                if (productIndex === -1) {
+                    reviewsData.push({
+                        product: selectedProduct,
+                        reviews: []
+                    });
+                }
+                
+                const newReview = {
+                    id: Date.now().toString(),
+                    text: reviewText
+                };
+                
+                reviewsData = reviewsData.map(product => {
+                    if (product.product === selectedProduct) {
+                        return {
+                            ...product,
+                            reviews: [...product.reviews, newReview]
+                        };
+                    }
+                    return product;
+                });
+                
+                document.getElementById('reviewText').value = '';
+                errorElement.textContent = '';
+                displayReviews();
+            } catch (error) {
+                errorElement.textContent = error.message;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayReviews();
+            
+            document.getElementById('submitReview').addEventListener('click', addReview);
+            document.getElementById('productSelect').addEventListener('change', displayReviews);
+        });
+    </script>
+</body>
+</html>
